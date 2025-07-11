@@ -19,8 +19,8 @@ public class HydroPowerSimulation implements GLEventListener {
 
     private Texture backgroundTex;
     private Texture turbineTex;
-    private Texture gatewayTex;
     private Texture waterFlowTex;
+    private Texture gatewayTex;
 
     private float waterFlowOffset = 0.0f;
 
@@ -90,8 +90,8 @@ public class HydroPowerSimulation implements GLEventListener {
         try {
             backgroundTex = TextureIO.newTexture(getClass().getResourceAsStream("/images/background.jpg"), false, "jpg");
             turbineTex = TextureIO.newTexture(getClass().getResourceAsStream("/images/turbine.png"), false, "png");
-            gatewayTex = TextureIO.newTexture(getClass().getResourceAsStream("/images/gateway.png"), false, "png");
             waterFlowTex = TextureIO.newTexture(getClass().getResourceAsStream("/images/waterflow.png"), false, "png");
+            gatewayTex = TextureIO.newTexture(getClass().getResourceAsStream("/images/gateway.png"), false, "png");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -163,7 +163,7 @@ public class HydroPowerSimulation implements GLEventListener {
 
     private void drawTurbine(GL2 gl) {
         gl.glPushMatrix();
-        gl.glTranslatef(300, 250, 0);
+        gl.glTranslatef(450, 250, 0);
         gl.glRotatef(turbineAngle, 0, 0, 1);
 
         turbineTex.enable(gl);
@@ -181,22 +181,27 @@ public class HydroPowerSimulation implements GLEventListener {
         gl.glPopMatrix();
     }
 
+
     private void drawGateway(GL2 gl) {
-        float openY = 200 + gatewayOpenLevel * 100;
+        float maxHeight = 100f;
+        float height = maxHeight * (1.0f - gatewayOpenLevel); // Decrease height when opening
+        float yTop = 230f; // fixed top position
+        float yBottom = yTop+100 - height;
 
         gatewayTex.enable(gl);
         gatewayTex.bind(gl);
 
         gl.glPushMatrix();
-        gl.glTranslatef(100, openY - 50, 0);
-        float width = 40;
-        float height = 100 * gatewayOpenLevel;
+        gl.glTranslatef(100, yBottom, 0);
+
+        float texTop = 1.0f;
+        float texBottom = gatewayOpenLevel; // Texture shrinks from bottom upward
 
         gl.glBegin(GL2.GL_QUADS);
-        gl.glTexCoord2f(0, 0); gl.glVertex2f(0, 0);
-        gl.glTexCoord2f(1, 0); gl.glVertex2f(width, 0);
-        gl.glTexCoord2f(1, 1); gl.glVertex2f(width, height);
-        gl.glTexCoord2f(0, 1); gl.glVertex2f(0, height);
+        gl.glTexCoord2f(0, texTop); gl.glVertex2f(0, height);
+        gl.glTexCoord2f(1, texTop); gl.glVertex2f(40, height);
+        gl.glTexCoord2f(1, texBottom); gl.glVertex2f(40, 0);
+        gl.glTexCoord2f(0, texBottom); gl.glVertex2f(0, 0);
         gl.glEnd();
 
         gatewayTex.disable(gl);
