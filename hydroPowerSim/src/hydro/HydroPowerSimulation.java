@@ -23,6 +23,7 @@ public class HydroPowerSimulation implements GLEventListener {
     private Texture gatewayTex;
 
     private float waterFlowOffset = 0.0f;
+    private float waterFlowSpeed = 0.0f;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new HydroPowerSimulation().start());
@@ -77,6 +78,7 @@ public class HydroPowerSimulation implements GLEventListener {
 
     private void updateTurbineSpeed() {
         turbineSpeed = gatewayOpenLevel * 5;
+        waterFlowSpeed = gatewayOpenLevel * 0.02f; // Water flow speed depends on gateway opening
     }
 
     @Override
@@ -118,12 +120,13 @@ public class HydroPowerSimulation implements GLEventListener {
 
         updateTurbineSpeed();
         turbineAngle += turbineSpeed;
-        waterFlowOffset += gatewayOpenLevel * 0.01f;
+        waterFlowOffset += waterFlowSpeed;
 
         drawBackground(gl);
+        drawRectangles(gl);
         drawWaterFlow(gl);
         drawTurbine(gl);
-        drawGateway(gl);
+        drawGateway(gl);  
     }
 
     private void drawBackground(GL2 gl) {
@@ -140,25 +143,71 @@ public class HydroPowerSimulation implements GLEventListener {
         backgroundTex.disable(gl);
     }
 
-    private void drawWaterFlow(GL2 gl) {
-        waterFlowTex.enable(gl);
-        waterFlowTex.bind(gl);
-
-        float offset = waterFlowOffset % 1.0f;
-        TextureCoords coords = waterFlowTex.getImageTexCoords();
-
+    private void drawRectangles(GL2 gl) {
+        gl.glDisable(GL2.GL_TEXTURE_2D);
+        
+        // upper door
+        gl.glColor3f(0.6f, 0.2f, 0.2f); // Dark red color
         gl.glBegin(GL2.GL_QUADS);
-        gl.glTexCoord2f(coords.left(), coords.bottom() + offset);
-        gl.glVertex2f(100, 100);
-        gl.glTexCoord2f(coords.right(), coords.bottom() + offset);
-        gl.glVertex2f(700, 100);
-        gl.glTexCoord2f(coords.right(), coords.top() + offset);
-        gl.glVertex2f(700, 200);
-        gl.glTexCoord2f(coords.left(), coords.top() + offset);
-        gl.glVertex2f(100, 200);
+        gl.glVertex2f(100, 325);   // Bottom left
+        gl.glVertex2f(150, 325);  // Bottom right
+        gl.glVertex2f(140, 400);  // Top right
+        gl.glVertex2f(110, 400);   // Top left
         gl.glEnd();
 
-        waterFlowTex.disable(gl);
+        // middle in door
+        gl.glColor3f(0.6f, 0.2f, 0.2f); // Dark red color
+        gl.glBegin(GL2.GL_QUADS);
+        gl.glVertex2f(100, 230);  // Bottom left
+        gl.glVertex2f(150, 230);  // Bottom right
+        gl.glVertex2f(150, 325);  // Top right
+        gl.glVertex2f(100, 325);  // Top left
+        gl.glEnd();
+
+        // ground
+        gl.glColor3f(0.6f, 0.2f, 0.2f); // Dark red color
+        gl.glBegin(GL2.GL_QUADS);
+        gl.glVertex2f(0, 200);   // Bottom left
+        gl.glVertex2f(750, 200);   // Bottom right
+        gl.glVertex2f(750, 230);  // Top right
+        gl.glVertex2f(0, 230);  // Top left
+        gl.glEnd();
+        
+        // up boundry
+        gl.glColor3f(0.6f, 0.2f, 0.2f); // Dark red color
+        gl.glBegin(GL2.GL_QUADS);
+        gl.glVertex2f(150, 300);   // Bottom left
+        gl.glVertex2f(750, 300);   // Bottom right
+        gl.glVertex2f(750, 325);  // Top right
+        gl.glVertex2f(150, 325);  // Top left
+        gl.glEnd();
+
+        gl.glColor3f(1.0f, 1.0f, 1.0f); // Reset color to white
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+    }
+
+    private void drawWaterFlow(GL2 gl) {
+        if (gatewayOpenLevel > 0.01f) { // Only draw water flow if gateway is open
+            waterFlowTex.enable(gl);
+            waterFlowTex.bind(gl);
+
+            float offset = waterFlowOffset % 1.0f;
+            TextureCoords coords = waterFlowTex.getImageTexCoords();
+
+            // Simple horizontal water flow from left to right (similar to original)
+            gl.glBegin(GL2.GL_QUADS);
+            gl.glTexCoord2f(coords.left() - offset, coords.bottom());
+            gl.glVertex2f(120, 230);    //bottom left
+            gl.glTexCoord2f(coords.right() - offset, coords.bottom());
+            gl.glVertex2f(750, 230);    //bottom right
+            gl.glTexCoord2f(coords.right() - offset, coords.top());
+            gl.glVertex2f(750, 300);       //top right
+            gl.glTexCoord2f(coords.left() - offset, coords.top());
+            gl.glVertex2f(120, 300);        //top left
+            gl.glEnd();
+
+            waterFlowTex.disable(gl);
+        }
     }
 
     private void drawTurbine(GL2 gl) {
@@ -180,7 +229,6 @@ public class HydroPowerSimulation implements GLEventListener {
         turbineTex.disable(gl);
         gl.glPopMatrix();
     }
-
 
     private void drawGateway(GL2 gl) {
         float maxHeight = 100f;
