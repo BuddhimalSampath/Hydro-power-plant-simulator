@@ -212,13 +212,13 @@ public class HydroPowerSimulation implements GLEventListener {
 
     private void drawTurbine(GL2 gl) {
         gl.glPushMatrix();
-        gl.glTranslatef(450, 250, 0);
+        gl.glTranslatef(450, 300, 0);
         gl.glRotatef(turbineAngle, 0, 0, 1);
 
         turbineTex.enable(gl);
         turbineTex.bind(gl);
 
-        float size = 60;
+        float size = 200;
         gl.glBegin(GL2.GL_QUADS);
         gl.glTexCoord2f(0, 0); gl.glVertex2f(-size, -size);
         gl.glTexCoord2f(1, 0); gl.glVertex2f(size, -size);
